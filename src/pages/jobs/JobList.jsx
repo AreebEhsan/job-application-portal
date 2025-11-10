@@ -11,8 +11,11 @@ export default function JobList() {
   if (loading) return <div className="p-6">Loading jobs…</div>
 
   return (
-    <div className="max-w-5xl mx-auto p-6 grid md:grid-cols-2 gap-4">
-      {jobs.map(j => <JobCard key={j.job_id} job={j} />)}
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-4">Open Roles</h1>
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {jobs.map(j => <JobCard key={j.job_id} job={j} />)}
+      </div>
     </div>
   )
 }

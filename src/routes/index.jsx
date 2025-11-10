@@ -14,11 +14,11 @@ import ProtectedRoute from '@/routes/ProtectedRoute'
 
 function RootLayout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 via-purple-900 to-fuchsia-900 text-white">
       <Navbar />
-      <div className="flex-1">
+      <main className="flex-1">
         <Outlet />
-      </div>
+      </main>
     </div>
   )
 }

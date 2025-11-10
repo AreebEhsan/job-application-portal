@@ -18,8 +18,8 @@ export default function ApplicationForm({ applicantId, jobId }) {
   }
 
   return (
-    <div className="border rounded-2xl p-4">
-      <button onClick={submit} disabled={submitting} className="px-4 py-2 rounded-xl bg-indigo-600 text-white">
+    <div className="glass p-4">
+      <button onClick={submit} disabled={submitting} className="cta">
         {submitting ? 'Submitting…' : 'Apply Now'}
       </button>
       {msg && <p className="mt-2 text-sm">{msg}</p>}

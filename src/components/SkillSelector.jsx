@@ -20,15 +20,19 @@ export default function SkillSelector({ selected, onChange }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="glass p-4 space-y-3">
       {all.map(s => {
         const picked = selected.find(x => x.skill_id === s.skill_id)
         return (
-          <div key={s.skill_id} className="flex items-center gap-3">
-            <input type="checkbox" checked={!!picked} onChange={() => toggle(s.skill_id)} />
-            <span className="w-40">{s.skill_name}</span>
+          <div key={s.skill_id} className="flex flex-wrap items-center gap-3">
+            <button type="button" onClick={() => toggle(s.skill_id)}
+              className={`px-3 py-1 rounded-full border transition-all duration-200 ${picked ? 'bg-white/30 border-white/40' : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
+              {picked ? '✓ ' : ''}{s.skill_name}
+            </button>
             {picked && (
-              <input type="range" min={1} max={5} value={picked.proficiency_level} onChange={e => setLevel(s.skill_id, Number(e.target.value))} />
+              <input type="range" min={1} max={5} value={picked.proficiency_level}
+                onChange={e => setLevel(s.skill_id, Number(e.target.value))}
+                className="w-40 accent-white/80" />
             )}
           </div>
         )
