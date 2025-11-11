@@ -1,21 +1,87 @@
+@import "./tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/inter/variable.css";
-@import "./tokens.css";
+/* ---------- Base ---------- */
+@layer base {
+  html, body, #root { height: 100%; }
 
-html, body, #root { height: 100%; }
-body {
-  @apply bg-bg text-ink;
-  font-family: var(--font-sans);
+  /* Use gradient if provided; otherwise fall back to solid bg */
+  body {
+    background: var(--bg-gradient, var(--bg));
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-/* utilities */
-.panel { @apply bg-surface rounded-lg shadow-card border border-line; }
-.badge { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm border border-line bg-white; }
-.btn   { @apply inline-flex items-center justify-center rounded-md px-4 py-2 font-medium transition-all; }
-.btn-primary { @apply bg-accent text-white hover:bg-accent-600; }
-.btn-ghost   { @apply bg-white border border-line hover:bg-gray-50; }
-.input { @apply w-full rounded-md border border-line bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/40; }
-.kbd   { @apply px-2 py-1 text-xs rounded border border-line bg-gray-50; }
+/* ---------- Components & Utilities ---------- */
+@layer components {
+  /* Glass surfaces used across Navbar/Hero/Cards */
+  .glass {
+    background: var(--glass-bg, rgba(255,255,255,0.08));
+    backdrop-filter: blur(var(--glass-blur, 20px));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 20px));
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.2));
+    border-radius: var(--r-lg, 1rem);
+    box-shadow: var(--shadow-card, 0 10px 25px rgba(0,0,0,0.30));
+  }
+
+  /* Neutral panel (light card) */
+  .panel {
+    background-color: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg, 1rem);
+    box-shadow: var(--shadow-card, 0 10px 25px rgba(0,0,0,0.12));
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.25rem 0.75rem; border-radius: 9999px;
+    font-size: 0.875rem; border: 1px solid var(--line);
+    background: #fff; color: var(--ink);
+  }
+
+  .btn { 
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600;
+    transition: transform 150ms, background 150ms, color 150ms, box-shadow 150ms;
+    outline: none;
+  }
+  .btn:focus-visible { box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-600); }
+  .btn-ghost   { background: #fff; border: 1px solid var(--line); color: var(--ink); }
+  .btn-ghost:hover { background: #f9fafb; }
+
+  .input {
+    width: 100%; border-radius: 0.5rem; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); padding: 0.5rem 0.75rem; outline: none;
+  }
+  /* Fallback focus ring (color-mix not supported everywhere) */
+  .input:focus { box-shadow: 0 0 0 3px rgba(16,185,129,0.35); }
+
+  .kbd {
+    padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 0.375rem;
+    border: 1px solid var(--line); background: #f9fafb; color: var(--ink);
+  }
+
+  /* Helpful text utilities */
+  .text-muted { color: var(--muted); }
+  .text-ink   { color: var(--ink); }
+}
+
+/* ---------- Helpers ---------- */
+
+/* Consistent section rhythm */
+@layer utilities {
+  .section { @apply max-w-6xl mx-auto px-4 md:px-6; }
+}
+
+/* Reduced-motion safety */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
