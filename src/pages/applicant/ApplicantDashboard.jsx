@@ -14,17 +14,25 @@ export default function ApplicantDashboard() {
   })() }, [session])
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">My Applications</h1>
-      <div className="space-y-2">
+    <div className="max-w-6xl mx-auto mt-10 space-y-6 px-4">
+      <div className="glass p-6 md:p-10">
+        <h1 className="text-4xl font-bold mb-4">My Applications</h1>
+        <p className="text-white/90 mb-2">Review your application statuses and track progress.</p>
+      </div>
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
         {apps.map(app => (
-          <div key={app.application_id} className="border rounded p-3">
-            <div className="font-medium">{app.job?.title}</div>
-            <div className="text-sm text-gray-600">Status: {app.status}</div>
-            <div className="text-sm">Company: {app.job?.company?.name}</div>
+          <div key={app.application_id} className="glass p-4 transition-transform hover:-translate-y-1 hover:shadow-2xl duration-300">
+            <div className="text-lg font-semibold">{app.job?.title}</div>
+            <div className="text-sm text-white/80">Company: {app.job?.company?.name}</div>
+            <div className="text-sm mt-1">Status: {app.status}</div>
           </div>
         ))}
-        {!apps.length && <div className="text-sm text-gray-600">No applications yet.</div>}
+        {!apps.length && (
+          <div className="glass p-4">
+            <div className="text-sm text-white/80">No applications yet.</div>
+          </div>
+        )}
       </div>
     </div>
   )

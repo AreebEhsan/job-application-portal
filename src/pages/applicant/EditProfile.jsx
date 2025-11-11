@@ -24,14 +24,16 @@ export default function EditProfile() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Edit Profile</h1>
-      <input className="border p-2 rounded w-full" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
-      <div>
-        <h3 className="font-semibold mb-2">Skills</h3>
-        <SkillSelector selected={skills} onChange={setSkills} />
+    <div className="max-w-6xl mx-auto mt-10 space-y-6 px-4">
+      <div className="glass p-6 md:p-10 space-y-4">
+        <h1 className="text-3xl font-bold">Edit Profile</h1>
+        <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" aria-label="Your name" />
+        <div>
+          <h3 className="font-semibold mb-2">Skills</h3>
+          <SkillSelector selected={skills} onChange={setSkills} />
+        </div>
+        <button onClick={save} className="cta bg-emerald-600 hover:bg-emerald-500" aria-label="Save profile">Save</button>
       </div>
-      <button onClick={save} className="px-4 py-2 rounded-xl bg-emerald-600 text-white">Save</button>
     </div>
   )
 }

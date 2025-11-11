@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function JobCard({ job }) {
   return (
-    <div className="glass p-4 hover:-translate-y-0.5 transition-transform">
+    <div className="glass p-4 transition-transform hover:-translate-y-1 hover:shadow-2xl duration-300">
       <div className="text-sm text-white/80">{job.company?.name}</div>
       <h3 className="text-xl font-semibold mt-1">{job.title}</h3>
       <div className="text-sm text-white/80">{job.location}</div>

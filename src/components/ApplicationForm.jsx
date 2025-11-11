@@ -19,7 +19,7 @@ export default function ApplicationForm({ applicantId, jobId }) {
 
   return (
     <div className="glass p-4">
-      <button onClick={submit} disabled={submitting} className="cta">
+      <button aria-label="Apply Now" onClick={submit} disabled={submitting} className="cta">
         {submitting ? 'Submitting…' : 'Apply Now'}
       </button>
       {msg && <p className="mt-2 text-sm">{msg}</p>}
