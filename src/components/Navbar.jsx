@@ -2,9 +2,13 @@ import { NavLink, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { signOut } from "@/lib/auth";
 import { useState, useEffect, useRef } from "react";
+import { useProfile } from "@/context/ProfileContext";
 
 export default function Navbar() {
   const { session } = useAuth();
+  const { profile } = useProfile();
+  const isApplicant = !!(session && profile?.role === 'applicant');
+  const isRecruiter = !!(session && profile?.role === 'recruiter');
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
 
@@ -38,18 +42,45 @@ export default function Navbar() {
       <div className="glass px-4 md:px-6 py-3 flex items-center justify-between shadow-lg">
         {/* Brand */}
         <Link to="/" className="font-bold text-white text-lg md:text-xl tracking-tight">
-          JobPortal
+          JobWise
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Primary" className="hidden md:flex items-center gap-4">
+        <nav aria-label="Primary" className="hidden md:flex items-center gap-6 text-sm">
           <NavLink to="/jobs" className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}>
             Jobs
           </NavLink>
-          <NavLink to="/company" className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}>
-            Company
-          </NavLink>
 
+          {/* Role-aware links */}
+          {!session && (
+            <NavLink to="/company" className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}>
+              Company
+            </NavLink>
+          )}
+
+          {session && isApplicant && (
+            <NavLink to="/applicant" className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}>
+              My Applications
+            </NavLink>
+          )}
+
+          {session && isRecruiter && (
+            <>
+              <NavLink to="/company" className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}>
+                Company
+              </NavLink>
+              <NavLink
+                to="/company/post"
+                className={({ isActive }) =>
+                  `${linkBase} ${isActive ? linkActive : "text-white bg-white/10 hover:bg-white/20"}`
+                }
+              >
+                Post Job
+              </NavLink>
+            </>
+          )}
+
+          {/* Auth actions */}
           {session ? (
             <button type="button" onClick={() => signOut()} className={`${linkBase} ${linkIdle}`}>
               Sign out
@@ -57,7 +88,7 @@ export default function Navbar() {
           ) : (
             <>
               <NavLink to="/signin" className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}>
-                Login
+                Sign in
               </NavLink>
               <NavLink
                 to="/signup"
@@ -96,9 +127,53 @@ export default function Navbar() {
           <NavLink to="/jobs" onClick={() => setOpen(false)} className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}>
             Jobs
           </NavLink>
-          <NavLink to="/company" onClick={() => setOpen(false)} className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}>
-            Company
+          {/* Role-aware links */}
+          <NavLink
+            to="/jobs"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}
+          >
+            Jobs
           </NavLink>
+
+          {!session && (
+            <NavLink
+              to="/company"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}
+            >
+              Company
+            </NavLink>
+          )}
+
+          {session && isApplicant && (
+            <NavLink
+              to="/applicant"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}
+            >
+              My Applications
+            </NavLink>
+          )}
+
+          {session && isRecruiter && (
+            <>
+              <NavLink
+                to="/company"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}
+              >
+                Company
+              </NavLink>
+              <NavLink
+                to="/company/post"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) => `block ${linkBase} ${isActive ? linkActive : linkIdle}`}
+              >
+                Post Job
+              </NavLink>
+            </>
+          )}
 
           {session ? (
             <button

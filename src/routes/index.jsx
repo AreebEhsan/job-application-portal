@@ -3,20 +3,27 @@ import Navbar from '@/components/Navbar'
 import Home from '@/pages/Home'
 import SignIn from '@/pages/auth/SignIn'
 import SignUp from '@/pages/auth/SignUp'
+import SelectRole from '@/pages/auth/SelectRole'
 import JobList from '@/pages/jobs/JobList'
 import JobDetail from '@/pages/jobs/JobDetail'
 import PostJob from '@/pages/jobs/PostJob'
 import ApplicantDashboard from '@/pages/applicant/ApplicantDashboard'
 import EditProfile from '@/pages/applicant/EditProfile'
+import ApplicantProfileSetup from '@/pages/applicant/ApplicantProfileSetup'
 import CompanyDashboard from '@/pages/company/CompanyDashboard'
 import Analytics from '@/pages/company/Analytics'
+import JobApplicants from '@/pages/company/JobApplicants'
 import ProtectedRoute from '@/routes/ProtectedRoute'
+import RoleGuard from '@/routes/RoleGuard'
+import ApplicantProfileGuard from '@/routes/ApplicantProfileGuard'
 
 function RootLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 via-purple-900 to-fuchsia-900 text-white">
+<div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 text-gray-100">
+
       <Navbar />
-      <main className="flex-1">
+      {/* push content below fixed navbar */}
+      <main className="flex-1 pt-24 pb-8">
         <Outlet />
       </main>
     </div>
@@ -31,46 +38,117 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/signin', element: <SignIn /> },
       { path: '/signup', element: <SignUp /> },
+      {
+        path: '/select-role',
+        element: (
+          <ProtectedRoute>
+            <SelectRole />
+          </ProtectedRoute>
+        ),
+      },
+
+      // Public jobs
       { path: '/jobs', element: <JobList /> },
       { path: '/jobs/:id', element: <JobDetail /> },
+
+      // Applicant area (guarded by role + profile completion)
       {
         path: '/applicant',
         element: (
-          <ProtectedRoute>
-            <ApplicantDashboard />
-          </ProtectedRoute>
+          <RoleGuard allow={['applicant']}>
+            <ProtectedRoute>
+              <ApplicantProfileGuard>
+                <ApplicantDashboard />
+              </ApplicantProfileGuard>
+            </ProtectedRoute>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: '/applicant/dashboard',
+        element: (
+          <RoleGuard allow={['applicant']}>
+            <ProtectedRoute>
+              <ApplicantProfileGuard>
+                <ApplicantDashboard />
+              </ApplicantProfileGuard>
+            </ProtectedRoute>
+          </RoleGuard>
         ),
       },
       {
         path: '/applicant/profile',
         element: (
-          <ProtectedRoute>
-            <EditProfile />
-          </ProtectedRoute>
+          <RoleGuard allow={['applicant']}>
+            <ProtectedRoute>
+              <ApplicantProfileGuard>
+                <EditProfile />
+              </ApplicantProfileGuard>
+            </ProtectedRoute>
+          </RoleGuard>
         ),
       },
       {
+        path: '/applicant/profile-setup',
+        element: (
+          <RoleGuard allow={['applicant']}>
+            <ProtectedRoute>
+              {/* no ApplicantProfileGuard here to avoid redirect loop */}
+              <ApplicantProfileSetup />
+            </ProtectedRoute>
+          </RoleGuard>
+        ),
+      },
+
+      // Recruiter area
+      {
         path: '/company',
         element: (
-          <ProtectedRoute>
-            <CompanyDashboard />
-          </ProtectedRoute>
+          <RoleGuard allow={['recruiter']}>
+            <ProtectedRoute>
+              <CompanyDashboard />
+            </ProtectedRoute>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: '/company/dashboard',
+        element: (
+          <RoleGuard allow={['recruiter']}>
+            <ProtectedRoute>
+              <CompanyDashboard />
+            </ProtectedRoute>
+          </RoleGuard>
         ),
       },
       {
         path: '/company/post',
         element: (
-          <ProtectedRoute>
-            <PostJob />
-          </ProtectedRoute>
+          <RoleGuard allow={['recruiter']}>
+            <ProtectedRoute>
+              <PostJob />
+            </ProtectedRoute>
+          </RoleGuard>
         ),
       },
       {
         path: '/company/analytics',
         element: (
-          <ProtectedRoute>
-            <Analytics />
-          </ProtectedRoute>
+          <RoleGuard allow={['recruiter']}>
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: '/company/jobs/:jobId/applicants',
+        element: (
+          <RoleGuard allow={['recruiter']}>
+            <ProtectedRoute>
+              <JobApplicants />
+            </ProtectedRoute>
+          </RoleGuard>
         ),
       },
     ],

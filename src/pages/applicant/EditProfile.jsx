@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { getOrCreateApplicant, setApplicantSkills, updateApplicant } from '@/lib/queries'
+import { getApplicantSkills, getOrCreateApplicant, setApplicantSkills, updateApplicant } from '@/lib/queries'
 import SkillSelector from '@/components/SkillSelector'
 
 export default function EditProfile() {
@@ -14,6 +14,8 @@ export default function EditProfile() {
     const a = await getOrCreateApplicant(session.user.id, session.user.email || undefined)
     setApplicant(a)
     setName(a.name || '')
+    const existingSkills = await getApplicantSkills(a.applicant_id)
+    setSkills(existingSkills.map(s => ({ skill_id: s.skill_id, proficiency_level: s.proficiency_level || 3 })))
   })() }, [session])
 
   const save = async () => {
