@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getJobById, getOrCreateApplicant } from '@/lib/queries'
-import { useAuth } from '@/context/AuthContext'
-import { useProfile } from '@/context/ProfileContext'
+import { useAuth } from '@/hooks/useAuth'
+import { useProfile } from '@/hooks/useProfile'
 import { supabase } from '@/lib/supabaseClient'
 import { uploadResumeFile } from '@/lib/storage'
 import Card from '@/components/ui/Card'
@@ -29,7 +29,6 @@ export default function JobDetail() {
   const [toast, setToast] = useState(null)
 
   const isApplicantRole = !!(profile && profile.role === 'applicant' && profile.applicant_id)
-  const isRecruiterRole = profile?.role === 'recruiter'
   const isApplied = !!application
 
   useEffect(() => {

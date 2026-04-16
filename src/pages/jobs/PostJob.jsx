@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { postJob } from '@/lib/queries'
-import { useProfile } from '@/context/ProfileContext'
+import { useProfile } from '@/hooks/useProfile'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function PostJob() {

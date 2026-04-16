@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { applicantsPerJob } from '@/lib/queries'
-import { useProfile } from '@/context/ProfileContext'
+import { useProfile } from '@/hooks/useProfile'
 
 export default function Analytics() {
   const { profile, loading: profileLoading } = useProfile()

@@ -3,7 +3,7 @@ import { signIn } from '@/lib/auth'
 import { Link, useNavigate } from 'react-router-dom'
 import { getWhoAmI } from '@/lib/profile'
 import { useAuth } from '@/context/AuthContext'
-import { useProfile } from '@/context/ProfileContext'
+import { useProfile } from '@/hooks/useProfile'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -30,7 +30,7 @@ export default function SignIn() {
       let who = null
       try {
         who = await getWhoAmI()
-      } catch (err) {
+      } catch (_err) {
         // If whoami fails, fall back to role selection
       }
       if (!who) {

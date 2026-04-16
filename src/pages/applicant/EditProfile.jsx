@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/hooks/useAuth'
 import { getApplicantSkills, getOrCreateApplicant, setApplicantSkills, updateApplicant } from '@/lib/queries'
 import SkillSelector from '@/components/SkillSelector'
 

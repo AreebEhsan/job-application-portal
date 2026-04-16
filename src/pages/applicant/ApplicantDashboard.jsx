@@ -6,8 +6,8 @@ import {
   getOrCreateApplicant,
   updateApplicant,
 } from '@/lib/queries'
-import { useAuth } from '@/context/AuthContext'
-import { useProfile } from '@/context/ProfileContext'
+import { useAuth } from '@/hooks/useAuth'
+import { useProfile } from '@/hooks/useProfile'
 import JobCard from '@/components/JobCard'
 import { rankJobs } from '@/utils/recommend'
 
@@ -44,8 +44,7 @@ export default function ApplicantDashboard() {
           me = await updateApplicant(me.applicant_id, patch)
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('ApplicantDashboard: failed to sync applicant name/email', e)
+        // Failed to sync applicant name/email
       }
 
       // Load this applicant's applications

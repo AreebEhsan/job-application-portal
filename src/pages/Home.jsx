@@ -1,5 +1,5 @@
-import { useAuth } from '@/context/AuthContext'
-import { useProfile } from '@/context/ProfileContext'
+import { useAuth } from '@/hooks/useAuth'
+import { useProfile } from '@/hooks/useProfile'
 
 export default function Home() {
   const { session } = useAuth()

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
-import { useProfile } from '@/context/ProfileContext'
+import { useAuth } from '@/hooks/useAuth'
+import { useProfile } from '@/hooks/useProfile'
 import { supabase } from '@/lib/supabaseClient'
 import { getOrCreateApplicant, getMyCompanies } from '@/lib/queries'
 
@@ -77,20 +77,14 @@ export default function SelectRole() {
     if (!session) return null
     // Try to use selected company, otherwise create stub
     if (selectedCompanyId) return selectedCompanyId
-    // eslint-disable-next-line no-console
-    console.log('SelectRole: creating stub company for recruiter…')
     const { data, error } = await supabase
       .from('company')
       .insert({ name: 'New Company', industry: null, location: null })
       .select('*')
       .single()
     if (error) {
-      // eslint-disable-next-line no-console
-      console.error('SelectRole: error creating company', error)
       throw error
     }
-    // eslint-disable-next-line no-console
-    console.log('SelectRole: created company', data)
     return data.company_id
   }
 

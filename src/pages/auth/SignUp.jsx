@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { signIn, signUp } from '@/lib/auth'
 import { supabase } from '@/lib/supabaseClient'
 import { getOrCreateApplicant } from '@/lib/queries'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/context/ProfileContext'
 
 export default function SignUp() {

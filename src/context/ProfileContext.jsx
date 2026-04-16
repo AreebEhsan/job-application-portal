@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/hooks/useAuth'
 import { getWhoAmI } from '@/lib/profile'
 
-const ProfileContext = createContext({ profile: null, loading: true, refreshProfile: async () => {} })
+export const ProfileContext = createContext({ profile: null, loading: true, refreshProfile: async () => {} })
 
 export function ProfileProvider({ children }) {
   const { session, loading: authLoading } = useAuth()
@@ -17,13 +17,8 @@ export function ProfileProvider({ children }) {
     }
     try {
       const who = await getWhoAmI()
-      // Debug: inspect what the server thinks our profile is
-      // eslint-disable-next-line no-console
-      console.log('ProfileContext.loadProfile whoami():', who)
       setProfile(who)
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to load profile via whoami()', error)
       setProfile(null)
     }
     setLoading(false)
@@ -52,5 +47,3 @@ export function ProfileProvider({ children }) {
     </ProfileContext.Provider>
   )
 }
-
-export const useProfile = () => useContext(ProfileContext)
