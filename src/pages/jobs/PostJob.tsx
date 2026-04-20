@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { motion, AnimatePresence } from 'framer-motion'
 import { postJob, getAllSkills } from '@/lib/queries'
 import { useProfile } from '@/hooks/useProfile'
 import { supabase } from '@/lib/supabaseClient'
+import { Button } from '@/components/ui/Button'
 
 export default function PostJob() {
   const { profile, loading: profileLoading } = useProfile()
@@ -63,14 +64,31 @@ export default function PostJob() {
   const missingCompany = !profile || profile.role !== 'recruiter' || !profile.company_id
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 space-y-6 px-4">
-      <div className="glass p-6 md:p-10">
-        <h1 className="text-3xl font-bold mb-4">Post a Job</h1>
+    <div className="max-w-2xl mx-auto px-4 space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="glass p-7 md:p-10 space-y-6"
+      >
+        <div>
+          <p className="text-violet-400 text-xs font-semibold uppercase tracking-wider mb-1">Recruiting</p>
+          <h1 className="text-2xl font-black tracking-tight text-white">Post a Job</h1>
+          {companyQuery.data?.name && (
+            <p className="text-sm text-white/40 mt-1">
+              Posting on behalf of <span className="text-white/65 font-medium">{companyQuery.data.name}</span>
+            </p>
+          )}
+        </div>
 
         {profileLoading || companyQuery.isLoading ? (
-          <p className="text-sm">Loading your company…</p>
+          <div className="space-y-3 animate-pulse">
+            <div className="h-10 bg-white/8 rounded-lg" />
+            <div className="h-10 bg-white/8 rounded-lg" />
+            <div className="h-32 bg-white/8 rounded-lg" />
+          </div>
         ) : missingCompany ? (
-          <p className="text-sm text-red-400">
+          <p className="px-3 py-3 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 text-sm">
             You must be a recruiter linked to a company to post a job.
           </p>
         ) : (
@@ -80,86 +98,117 @@ export default function PostJob() {
               setMessage(null)
               postMutation.mutate()
             }}
-            className="space-y-4"
+            className="space-y-5"
           >
-            <p className="text-sm text-white/80">
-              Posting on behalf of:{' '}
-              <span className="font-semibold">
-                {companyQuery.data?.name ?? 'Your company'}
-              </span>
-            </p>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-white/60 uppercase tracking-wider">Job Title *</label>
+              <input
+                className="input"
+                placeholder="e.g. Senior Frontend Engineer"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                required
+                aria-label="Job title"
+              />
+            </div>
 
-            <input
-              className="input"
-              placeholder="Job title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-              aria-label="Job title"
-            />
-            <input
-              className="input"
-              placeholder="Location (e.g. Remote, Atlanta, GA)"
-              value={location}
-              onChange={e => setLocation(e.target.value)}
-              aria-label="Location"
-            />
-            <textarea
-              className="input"
-              placeholder="Job description"
-              rows={6}
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              aria-label="Job description"
-            />
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-white/60 uppercase tracking-wider">Location</label>
+              <input
+                className="input"
+                placeholder="e.g. Remote · Atlanta, GA · Hybrid"
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                aria-label="Location"
+              />
+            </div>
 
-            {/* Required skills */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-white/60 uppercase tracking-wider">Description</label>
+              <textarea
+                className="input resize-none"
+                placeholder="Describe the role, responsibilities, and what you're looking for…"
+                rows={6}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                aria-label="Job description"
+              />
+            </div>
+
+            {/* Skills */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-white/90">Required skills</p>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-white/60 uppercase tracking-wider">Required Skills</label>
+                {selectedSkillIds.length > 0 && (
+                  <span className="text-xs text-violet-400 font-medium">
+                    {selectedSkillIds.length} selected
+                  </span>
+                )}
+              </div>
               {skillsQuery.isLoading ? (
-                <p className="text-xs text-white/60">Loading skills…</p>
-              ) : (
                 <div className="flex flex-wrap gap-2">
-                  {(skillsQuery.data ?? []).map(s => (
-                    <button
-                      key={s.skill_id}
-                      type="button"
-                      onClick={() => toggleSkill(s.skill_id)}
-                      className={`px-3 py-1 rounded-full border text-sm transition-all ${
-                        selectedSkillIds.includes(s.skill_id)
-                          ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                          : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20'
-                      }`}
-                    >
-                      {selectedSkillIds.includes(s.skill_id) ? '✓ ' : ''}
-                      {s.skill_name}
-                    </button>
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="h-7 w-16 bg-white/8 rounded-full animate-pulse" />
                   ))}
                 </div>
-              )}
-              {selectedSkillIds.length > 0 && (
-                <p className="text-xs text-white/60">
-                  {selectedSkillIds.length} skill{selectedSkillIds.length === 1 ? '' : 's'} selected
-                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {(skillsQuery.data ?? []).map(s => {
+                    const selected = selectedSkillIds.includes(s.skill_id)
+                    return (
+                      <button
+                        key={s.skill_id}
+                        type="button"
+                        onClick={() => toggleSkill(s.skill_id)}
+                        className={`px-3 py-1 rounded-full border text-xs font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 ${
+                          selected
+                            ? 'bg-violet-600/25 border-violet-500/50 text-violet-300 ring-1 ring-violet-500/30'
+                            : 'bg-white/5 border-white/10 text-white/55 hover:bg-white/10 hover:text-white/80'
+                        }`}
+                      >
+                        {selected && '✓ '}{s.skill_name}
+                      </button>
+                    )
+                  })}
+                </div>
               )}
             </div>
 
-            <button
-              className="cta bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60"
+            <AnimatePresence>
+              {message && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={`px-3 py-2.5 rounded-lg border text-sm ${
+                    message.ok
+                      ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300'
+                      : 'bg-red-500/10 border-red-500/25 text-red-300'
+                  }`}
+                >
+                  {message.ok ? '✓ ' : ''}{message.text}
+                </motion.p>
+              )}
+            </AnimatePresence>
+
+            <Button
               type="submit"
               disabled={postMutation.isPending || !title.trim()}
+              className="w-full py-2.5 text-base"
             >
-              {postMutation.isPending ? 'Posting…' : '+ Post Job'}
-            </button>
+              {postMutation.isPending ? (
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.37 0 0 5.37 0 12h4z"/>
+                  </svg>
+                  Posting…
+                </span>
+              ) : '+ Post Job'}
+            </Button>
           </form>
         )}
-
-        {message && (
-          <p className={`text-sm mt-3 ${message.ok ? 'text-emerald-400' : 'text-red-400'}`}>
-            {message.text}
-          </p>
-        )}
-      </div>
+      </motion.div>
     </div>
   )
 }

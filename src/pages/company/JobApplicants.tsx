@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabaseClient'
 import { getJobApplications, updateApplicationStatus } from '@/lib/queries'
 import { useProfile } from '@/hooks/useProfile'
 import type { ApplicationStatus } from '@/lib/types'
-import Card from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import Pagination from '@/components/ui/Pagination'
@@ -13,19 +13,18 @@ import Pagination from '@/components/ui/Pagination'
 const PAGE_SIZE = 15
 
 const STATUS_OPTIONS: ApplicationStatus[] = [
-  'submitted',
-  'in_review',
-  'interview',
-  'offer',
-  'rejected',
+  'submitted', 'in_review', 'interview', 'offer', 'rejected',
 ]
 
-const STATUS_BADGE: Record<ApplicationStatus, { label: string; cls: string }> = {
-  submitted: { label: 'Submitted', cls: 'bg-blue-100 border-blue-300 text-blue-800' },
-  in_review: { label: 'In review', cls: 'bg-amber-100 border-amber-300 text-amber-800' },
-  interview: { label: 'Interview', cls: 'bg-emerald-100 border-emerald-300 text-emerald-800' },
-  offer:     { label: 'Offer',     cls: 'bg-purple-100 border-purple-300 text-purple-800' },
-  rejected:  { label: 'Rejected',  cls: 'bg-red-100 border-red-300 text-red-800' },
+const STATUS_CFG: Record<ApplicationStatus, {
+  label: string
+  variant: NonNullable<Parameters<typeof Badge>[0]['variant']>
+}> = {
+  submitted: { label: 'Submitted', variant: 'indigo' },
+  in_review: { label: 'In Review', variant: 'warning' },
+  interview: { label: 'Interview', variant: 'violet' },
+  offer:     { label: 'Offer',     variant: 'success' },
+  rejected:  { label: 'Rejected',  variant: 'danger' },
 }
 
 export default function JobApplicants() {
@@ -42,7 +41,6 @@ export default function JobApplicants() {
 
   const enabled = !profileLoading && !!profile?.company_id && !!jobId
 
-  // ─── Fetch job ───────────────────────────────────────────────────────────────
   const jobQuery = useQuery({
     queryKey: ['job', jobId],
     queryFn: async () => {
@@ -58,14 +56,12 @@ export default function JobApplicants() {
     enabled,
   })
 
-  // ─── Fetch applicants (paginated) ────────────────────────────────────────────
   const appsQuery = useQuery({
     queryKey: ['job-applicants', jobId, page],
     queryFn: () => getJobApplications(jobId, page, PAGE_SIZE),
     enabled,
   })
 
-  // ─── Status update mutation with optimistic update ───────────────────────────
   const statusMutation = useMutation({
     mutationFn: ({ applicationId, status }: { applicationId: string; status: ApplicationStatus }) =>
       updateApplicationStatus(applicationId, status),
@@ -84,9 +80,7 @@ export default function JobApplicants() {
       return { previous }
     },
     onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['job-applicants', jobId, page], context.previous)
-      }
+      if (context?.previous) queryClient.setQueryData(['job-applicants', jobId, page], context.previous)
     },
   })
 
@@ -132,12 +126,18 @@ export default function JobApplicants() {
     }
   }
 
-  if (profileLoading) return <div className="max-w-6xl mx-auto px-4 pt-6">Loading…</div>
+  if (profileLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 pt-6">
+        <div className="glass p-8 animate-pulse h-32" />
+      </div>
+    )
+  }
 
   if (!profile || profile.role !== 'recruiter' || !profile.company_id) {
     return (
       <div className="max-w-6xl mx-auto px-4 pt-6 space-y-4">
-        <p className="text-sm text-red-400">
+        <p className="glass p-4 text-sm text-red-300">
           You must be a recruiter linked to a company to view applicants.
         </p>
         <Button variant="ghost" onClick={() => navigate(-1)}>Back</Button>
@@ -148,7 +148,7 @@ export default function JobApplicants() {
   if (jobQuery.isError) {
     return (
       <div className="max-w-6xl mx-auto px-4 pt-6 space-y-4">
-        <p className="text-sm text-red-400">{(jobQuery.error as Error).message}</p>
+        <p className="glass p-4 text-sm text-red-300">{(jobQuery.error as Error).message}</p>
         <Button variant="ghost" onClick={() => navigate(-1)}>Back</Button>
       </div>
     )
@@ -157,121 +157,138 @@ export default function JobApplicants() {
   const job = jobQuery.data
   const apps = appsQuery.data?.data ?? []
   const totalCount = appsQuery.data?.count ?? 0
-
-  const filteredApps = statusFilter === 'all'
-    ? apps
-    : apps.filter(a => a.status === statusFilter)
+  const filteredApps = statusFilter === 'all' ? apps : apps.filter(a => a.status === statusFilter)
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6 pt-24 pb-10 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 space-y-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="glass p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Applicants for {job?.title ?? '…'}
+          <p className="text-violet-400 text-xs font-semibold uppercase tracking-wider mb-1">Applicants</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+            {job?.title ?? '…'}
           </h1>
           {job && 'company' in job && (job as { company?: { name?: string } }).company?.name && (
-            <p className="text-sm text-white/80">
+            <p className="text-sm text-white/40 mt-0.5">
               {(job as { company?: { name?: string } }).company!.name}
             </p>
           )}
         </div>
         <Button variant="ghost" onClick={() => navigate('/company/dashboard')}>
-          Back to dashboard
+          ← Back
         </Button>
-      </div>
+      </motion.div>
 
-      <Card className="space-y-4">
-        {/* Filter + count row */}
+      {/* Main card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+        className="glass p-6 md:p-8 space-y-5"
+      >
+        {/* Filter row */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <p className="text-sm text-muted">
-            {totalCount} application{totalCount === 1 ? '' : 's'} for this job.
+          <p className="text-sm text-white/45">
+            {totalCount} application{totalCount === 1 ? '' : 's'}
           </p>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted">Status filter:</span>
+            <span className="text-white/40">Filter:</span>
             <select
-              className="input bg-white border border-[#e5e7eb] rounded px-2 py-1 text-sm"
+              className="input w-auto"
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value as ApplicationStatus | 'all'); setPage(1) }}
             >
-              <option value="all">All</option>
+              <option value="all">All statuses</option>
               {STATUS_OPTIONS.map(s => (
-                <option key={s} value={s}>{STATUS_BADGE[s].label}</option>
+                <option key={s} value={s}>{STATUS_CFG[s].label}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* AI Advisor */}
-        <div className="border border-[#e5e7eb] rounded-md p-3 bg-slate-50/80 space-y-2">
-          <div className="flex items-center justify-between gap-2">
+        {/* AI advisor */}
+        <div className="rounded-xl border border-white/8 bg-white/3 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-ink">AI suggestion (beta)</p>
-              <p className="text-xs text-muted">
-                Uses Gemini to summarize applicants. Advisory only.
-              </p>
+              <p className="text-sm font-semibold text-white">AI Suggestion <span className="text-xs text-white/35 font-normal ml-1">(beta)</span></p>
+              <p className="text-xs text-white/40">Uses Gemini to summarize and rank applicants. Advisory only.</p>
             </div>
             <Button
-              type="button"
-              variant="outline"
-              className="text-xs px-3 py-1"
+              size="sm"
+              variant="ghost"
               onClick={handleGenerateAiSuggestion}
               disabled={aiLoading || apps.length === 0}
             >
-              {aiLoading ? 'Generating…' : 'Generate suggestion'}
+              {aiLoading ? 'Generating…' : '✨ Generate'}
             </Button>
           </div>
-          {aiError && <p className="text-xs text-red-500">{aiError}</p>}
+          {aiError && <p className="text-xs text-red-400">{aiError}</p>}
           {aiSuggestion && (
-            <p className="text-xs text-ink whitespace-pre-line">{aiSuggestion}</p>
-          )}
-          {!aiSuggestion && !aiError && !aiLoading && apps.length === 0 && (
-            <p className="text-xs text-muted">No applicants yet to analyze.</p>
+            <p className="text-xs text-white/70 whitespace-pre-line leading-relaxed border-t border-white/8 pt-3">
+              {aiSuggestion}
+            </p>
           )}
         </div>
 
         {/* Table header */}
         {filteredApps.length > 0 && (
-          <div className="hidden md:grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1.5fr] gap-3 text-sm font-medium text-ink border-b border-[#e5e7eb] pb-2">
+          <div className="hidden md:grid grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] gap-3 text-xs font-semibold text-white/35 uppercase tracking-wider border-b border-white/8 pb-2">
             <span>Applicant</span>
             <span>Email</span>
-            <span>Date applied</span>
+            <span>Date</span>
             <span>Status</span>
             <span>Resume</span>
           </div>
         )}
 
+        {/* Applicant rows */}
         {filteredApps.length === 0 ? (
-          <p className="text-sm text-muted">No applications match this filter.</p>
+          <div className="text-center py-10">
+            <p className="text-3xl mb-3">📭</p>
+            <p className="text-white/40 text-sm">No applications match this filter.</p>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {filteredApps.map(app => {
+          <div className="space-y-2">
+            {filteredApps.map((app, i) => {
               const appliedOn = app.date_applied ? new Date(app.date_applied) : null
-              const statusInfo = STATUS_BADGE[app.status]
+              const statusInfo = STATUS_CFG[app.status]
               return (
-                <div
+                <motion.div
                   key={app.application_id}
-                  className="glass border border-white/10 rounded-md px-3 py-3 text-sm flex flex-col md:grid md:grid-cols-[2fr_2fr_1.5fr_1.5fr_1.5fr] gap-2 md:items-center"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="p-3 rounded-xl border border-white/6 bg-white/2 hover:bg-white/5 transition-colors text-sm
+                             flex flex-col md:grid md:grid-cols-[2fr_2fr_1.5fr_1.5fr_1fr] gap-2 md:items-center"
                 >
                   <div>
-                    <div className="font-semibold text-ink">
-                      {app.applicant?.name ?? 'Unnamed applicant'}
-                    </div>
+                    <p className="font-semibold text-white">
+                      {app.applicant?.name ?? 'Unnamed'}
+                    </p>
                     {app.cover_letter && (
-                      <p className="text-xs text-muted mt-1 line-clamp-2">{app.cover_letter}</p>
+                      <p className="text-xs text-white/35 mt-0.5 line-clamp-1">{app.cover_letter}</p>
                     )}
                   </div>
-                  <div className="text-ink break-words">
+
+                  <p className="text-white/55 text-xs break-all">
                     {app.applicant?.email ?? 'No email'}
-                  </div>
-                  <div className="text-muted">
+                  </p>
+
+                  <p className="text-white/35 text-xs">
                     {appliedOn
-                      ? appliedOn.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                      ? appliedOn.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
                       : '—'}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {statusInfo && <Badge className={statusInfo.cls}>{statusInfo.label}</Badge>}
+                  </p>
+
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {statusInfo && <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>}
                     <select
-                      className="input bg-white border border-[#e5e7eb] rounded px-2 py-1 text-xs"
+                      className="input w-auto text-xs px-2 py-1 h-auto"
                       value={app.status}
                       disabled={statusMutation.isPending}
                       onChange={e =>
@@ -282,21 +299,22 @@ export default function JobApplicants() {
                       }
                     >
                       {STATUS_OPTIONS.map(s => (
-                        <option key={s} value={s}>{STATUS_BADGE[s].label}</option>
+                        <option key={s} value={s}>{STATUS_CFG[s].label}</option>
                       ))}
                     </select>
                   </div>
+
                   <div>
                     <Button
                       variant="ghost"
-                      className="px-3 py-1 text-xs border border-white/20"
+                      size="sm"
                       disabled={!app.resume_url}
                       onClick={() => app.resume_url && handleViewResume(app.resume_url)}
                     >
-                      View resume
+                      Resume
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               )
             })}
           </div>
@@ -308,7 +326,7 @@ export default function JobApplicants() {
           pageSize={PAGE_SIZE}
           onPageChange={setPage}
         />
-      </Card>
+      </motion.div>
     </div>
   )
 }
